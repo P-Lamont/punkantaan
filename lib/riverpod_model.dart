@@ -8,7 +8,7 @@ class RiverpodModel extends ChangeNotifier{
   int? songIndex;
   double titleFontSize=20;
   double bodyFontSize=18;
-  Map<String,int>? highlighted;
+  Map<String,dynamic>? highlighted;
   Future<void> readJson() async {
     final String response = await rootBundle.loadString('assets/songs.json');
     final data = await json.decode(response);
@@ -28,7 +28,7 @@ class RiverpodModel extends ChangeNotifier{
     bodyFontSize =data;
     notifyListeners();
   }
-  void setHighlighted(Map<String,int>? data){
+  void setHighlighted(Map<String,dynamic>? data){
     highlighted=data;
     notifyListeners();
   }

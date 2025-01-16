@@ -3,23 +3,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:punkantaan/home_page.dart';
 import 'package:punkantaan/main.dart';
 
-class StanzaColumn extends StatelessWidget {
+class StanzaColumn extends ConsumerWidget {
   const StanzaColumn({
     super.key,
     required this.bodyFontSize,
     required this.listStanza,
+    this.stanza,
+    this.highlightedLine,
+    this.highlightedStanza,
+    this.type,
+    this.songIndex,
+    this.highlightedIndex
   });
 
   final double bodyFontSize;
   final List<String> listStanza;
-
+  final int? stanza;
+  final int? highlightedLine;
+  final int? highlightedStanza;
+  final String? type;
+  final int? songIndex;
+  final int? highlightedIndex;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: listStanza.map(
-        (item) {return LeftAlignText(
-          texts: item,
+      children: listStanza.asMap().entries.map(
+        (item) {
+          if (item.key+1==highlightedLine && 
+          stanza==highlightedStanza && 
+          type=='stanza' &&
+          songIndex==highlightedIndex){
+            return LeftAlignText(
+            texts: item.value,
+            fontSize:bodyFontSize,
+            textcolor:Colors.black,
+            backgroundColor: ref.watch(riverpodProvider).highlightColor,
+          );            
+          }
+          return LeftAlignText(
+          texts: item.value,
           fontSize:bodyFontSize,
           textcolor:Colors.black
         );}
@@ -49,11 +72,11 @@ class TitleHeading extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children:[
         CenterText(
-          texts:"${ref.watch(riverpodProvider).songcontents![songIndex!].title} (${ref.watch(riverpodProvider).songcontents![songIndex!].old})", 
+          texts:"${songIndex!+1}. ${ref.watch(riverpodProvider).songcontents![songIndex!].title} (${ref.watch(riverpodProvider).songcontents![songIndex!].old})", 
           fontSize: titleFontSize,
           color: Colors.black,
           backgroundColor:(ref.watch(riverpodProvider).highlighted?['type']=='title'&&
-            ref.watch(riverpodProvider).highlighted?['index']-1==songIndex)?Colors.yellow:null
+            ref.watch(riverpodProvider).highlighted?['index']==songIndex)?ref.watch(riverpodProvider).highlightColor:null
         ),
         CenterText(
           texts: 'Tune of:${ref.watch(riverpodProvider).songcontents![songIndex!].tune}', 

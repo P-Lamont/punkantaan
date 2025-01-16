@@ -2,7 +2,6 @@
 import 'package:punkantaan/home_page.dart';
 import 'package:punkantaan/riverpod_model.dart';
 import 'dart:core';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +11,7 @@ void main() {
   runApp(const ProviderScope(child:MyApp()));
 
 }
+
 final riverpodProvider = ChangeNotifierProvider<RiverpodModel>((ref){
   return RiverpodModel();
 }); 
@@ -21,8 +21,9 @@ class MyApp extends ConsumerWidget {
 
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context,WidgetRef ref){
     final appState = ref.watch(riverpodProvider);
+    appState.initPreference();
     appState.readJson();
     bool hasContents = appState.songcontents==null;
     return MaterialApp(
@@ -31,7 +32,8 @@ class MyApp extends ConsumerWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: hasContents?const CircularProgressIndicator():const MyHomePage()
+      home: hasContents?const CircularProgressIndicator():const MyHomePage(),
+      // routes: ,
     );
   }
 

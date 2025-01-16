@@ -1,0 +1,6 @@
+{
+    "licenses":[
+        "cupertino icons","path provider","flutter riverpod","fuzzywuzzy",
+        "flutter colorpicker","shared preferences"
+    ]
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:punkantaan/main.dart';
 import 'package:punkantaan/search_page.dart';
+import 'package:punkantaan/settings_page.dart';
 import 'package:punkantaan/util.dart';
 
 class MyHomePage extends ConsumerStatefulWidget {
@@ -74,7 +75,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               showSearch(context: context, delegate:MySearchDelegant ());
             }, 
             icon: const Icon(Icons.search),
-          )
+          ),
+          IconButton(
+            onPressed:()async{
+              Navigator.push(
+                context,
+               MaterialPageRoute(builder: (context) => const SettingsPage()),
+               );
+              }, 
+          icon: const Icon(Icons.settings))
         ],
 
       ),
@@ -93,17 +102,34 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               SizedBox(height:appState.bodyFontSize*2),
               StanzaColumn(
                 listStanza:appState.songcontents![appState.songIndex!].stanza[0], 
-                bodyFontSize: appState.bodyFontSize
+                bodyFontSize: appState.bodyFontSize,
+                stanza: 1,
+                highlightedLine: appState.highlighted?['line'],
+                highlightedStanza: appState.highlighted?['stanza'],
+                type:appState.highlighted?['type'],
+                songIndex: appState.songIndex,
+                highlightedIndex: appState.highlighted?['index'],
               ),
               if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
               SizedBox(height: appState.bodyFontSize*2),
               if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: appState.songcontents![appState.songIndex!].chorus.map(
+                children: appState.songcontents![appState.songIndex!].chorus.asMap().entries.map(
                   (item) {
+                    if(
+                      appState.songIndex==appState.highlighted?['index']&&
+                      appState.highlighted?['type']=='chorus' &&
+                      appState.highlighted?['line']==item.key+1){
+                      return CenterText(
+                        texts: item.value,
+                        fontSize:appState.bodyFontSize,
+                        color:Colors.red,
+                        backgroundColor: appState.highlightColor,
+                      );                      
+                    }
                     return CenterText(
-                      texts: item,
+                      texts: item.value,
                       fontSize:appState.bodyFontSize,
                       color:Colors.red,
                     );
@@ -126,13 +152,22 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     Navigator.pop(context);
   }
   List<Widget> otherStanza(WidgetRef ref,double height){
-    List<List<Widget>>data =ref.watch(riverpodProvider)
-      .songcontents![ref.watch(riverpodProvider).songIndex!]
-      .stanza.sublist(1).map((item)
+    final riverpod = ref.watch(riverpodProvider);
+    List<List<Widget>>data =riverpod
+      .songcontents![riverpod.songIndex!]
+      .stanza.sublist(1).asMap().entries.map((item)
       {
-        return [StanzaColumn(
-          listStanza:item,
-          bodyFontSize: ref.watch(riverpodProvider).bodyFontSize,),
+        return [
+          StanzaColumn(
+            listStanza:item.value,
+            bodyFontSize: riverpod.bodyFontSize,
+            stanza: item.key+2,
+            highlightedLine: riverpod.highlighted?['line'],
+            highlightedStanza: riverpod.highlighted?['stanza'],
+            type:riverpod.highlighted?['type'],
+            songIndex: riverpod.songIndex,
+            highlightedIndex: riverpod.highlighted?['index'],
+          ),
           SizedBox(height: height,)
         ];
       }).toList();

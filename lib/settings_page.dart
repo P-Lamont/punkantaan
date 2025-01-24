@@ -45,7 +45,7 @@ class SettingsPage extends ConsumerWidget {
                 MaterialPageRoute(builder: (context) => const AppLicensePage()),
                   );
               },  
-              child: Text('Licenses'))
+              child: const Text('Licenses'))
             // TextButton(onPressed: ()async{
             // }
             // , child: child)
@@ -81,15 +81,17 @@ class _HighlightColorPickerState extends ConsumerState<HighlightColorPicker> {
           title: const Text('Pick a color!'),
           content: SingleChildScrollView(
             child: ColorPicker(
+              labelTypes:const [ColorLabelType.rgb],
               pickerColor: pickerColor!,
               onColorChanged:changeColor,
             ),
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Got it'),
+              child: const Text('Ok'),
               onPressed: ()async{
-                // print('${pickerColor.red},${pickerColor.green},${pickerColor.blue},${pickerColor.alpha}');
+                // print(pickerColor!);
+                // print('${pickerColor!.red},${pickerColor!.green},${pickerColor!.blue},${pickerColor!.alpha}');
                 await appState.changeColorHighlight(pickerColor!);
                 if(context.mounted){
                   Navigator.of(context).pop();

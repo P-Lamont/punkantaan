@@ -19,10 +19,13 @@ class SearchResultView extends ConsumerWidget {
     final appState = ref.watch(riverpodProvider);
     List<Map<String,dynamic>> resultlist =[];
     // var regString = RegExp(query, caseSensitive: false);
+    RegExp regExp = RegExp(r'[^a-zA-Z]/s');
     for (int i=0;i<appState.songcontents!.length;i++){
       SongModel content = appState.songcontents![i];
-      // List<Map<String,dynamic>> results=[];
-      int titleratio = partialRatio(query.toUpperCase(), content.title);
+        // List<Map<String,dynamic>> results=[];
+
+      String title = content.title.replaceAll(regExp,'');
+      int titleratio = partialRatio(query.toUpperCase(), title);
       if (titleratio>90){
         resultlist.add(
           {
@@ -38,10 +41,10 @@ class SearchResultView extends ConsumerWidget {
         // results['Title']=true;
       }
       if (content.chorus.isNotEmpty){
-        // List<int> chorusLines =[];
+        List<String> chorusList =content.chorus.map((e)=>e.replaceAll(regExp,'')).toList();
         final chorusLines =extractAllSorted(
           query: query, 
-          choices: content.chorus,
+          choices: chorusList,
           ratio: PartialRatio(),
           cutoff: 90
           );
@@ -67,9 +70,10 @@ class SearchResultView extends ConsumerWidget {
           // if (regString.hasMatch(stanzaline.value)){
           //   stanzaLines.add(stanzaline.key+1)
           // }
+          List<String>stanzaAlpha = stanzaline.value.map((e)=>e.replaceAll(regExp,'')).toList();
           final stanzaResults = extractAllSorted(
             query: query, 
-            choices: stanzaline.value,
+            choices: stanzaAlpha,
             ratio: PartialRatio(),
             cutoff: 90
           );
@@ -113,15 +117,18 @@ class SearchResultView extends ConsumerWidget {
       child: ListView.builder( 
         itemCount: resultlist.length, itemBuilder: (context, index) { 
           Map<String,dynamic>data = resultlist[index];
-          return ListTile( 
-            title: Text(data['string']),
-            subtitle: Text('On:${data['type']} Stanza: ${data['stanza']}'),
-            onTap: () { 
-              ref.watch(riverpodProvider).setHighlighted(data);
-              ref.watch(riverpodProvider)
-                .setSongIndex(data['index']);
-              Navigator.pop(context);
-            }, 
+          return Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: ListTile( 
+              title: Text(data['string']),
+              subtitle: Text('On:${data['type']} Stanza: ${data['stanza']}'),
+              onTap: () { 
+                ref.watch(riverpodProvider).setHighlighted(data);
+                ref.watch(riverpodProvider)
+                  .setSongIndex(data['index']);
+                Navigator.pop(context);
+              }, 
+            ),
           ); 
         }, 
       ),

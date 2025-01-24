@@ -12,7 +12,9 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false
+  );
 
   @override void dispose() {
     _scrollController.dispose(); 
@@ -25,12 +27,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       drawer:SizedBox(
           width: MediaQuery.of(context).size.width*.75,
           child: Scrollbar(
-            // controller: _scrollController,
+            thumbVisibility:true,
+            // trackVisibility: true,
+            controller: _scrollController,
             thickness: 16,
             radius: const Radius.circular(10), // Rounded corners
             interactive: true,
             child: ListView(
-              // padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(0),
+              controller: _scrollController,
               children: [
                 DrawerHeader( 
                   decoration: BoxDecoration( color: Theme.of(context).colorScheme.primaryContainer, ), 
@@ -46,7 +51,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 ...appState.songcontents!.map((item){
                   int songIndex = appState.songcontents!.indexOf(item);
                   return Card(
-                    color: Theme.of(context).cardColor,
+                    margin: const EdgeInsets.all(0),
+                    color: songIndex.isEven?Colors.white:Colors.white60,
                     child: ListTile(
                       title: Text(
                         '${songIndex+1} ${item.title}',
@@ -55,10 +61,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       onTap:(){
                         _onItemTapped(ref,songIndex);
                       },
-                      tileColor: Colors.white,
+                      tileColor: songIndex.isEven?Colors.white:Colors.white60,
                       textColor: Colors.black,
                     // textColor: ,
-                              ),
+                    ),
                   );
               }),
               ]
@@ -69,76 +75,86 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title:const Text('Punkantaan'),
-        actions: [
-          IconButton(
-            onPressed: ()async{
-              showSearch(context: context, delegate:MySearchDelegant ());
-            }, 
-            icon: const Icon(Icons.search),
-          ),
-          IconButton(
-            onPressed:()async{
-              Navigator.push(
-                context,
-               MaterialPageRoute(builder: (context) => const SettingsPage()),
-               );
-              }, 
-          icon: const Icon(Icons.settings))
+        actions:const [
+          SearchIcon(),
+          SettingsIcon()
         ],
 
       ),
-      body:appState.songIndex!=null?SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            children: [
-              SizedBox(height:(appState.titleFontSize*1.5)),
-              TitleHeading(
-                widget: widget, 
-                songIndex: appState.songIndex, 
-                titleFontSize: appState.titleFontSize, 
-                bodyFontSize: appState.bodyFontSize
-              ),
-              SizedBox(height:appState.bodyFontSize*2),
-              StanzaColumn(
-                listStanza:appState.songcontents![appState.songIndex!].stanza[0], 
-                bodyFontSize: appState.bodyFontSize,
-                stanza: 1,
-                highlightedLine: appState.highlighted?['line'],
-                highlightedStanza: appState.highlighted?['stanza'],
-                type:appState.highlighted?['type'],
-                songIndex: appState.songIndex,
-                highlightedIndex: appState.highlighted?['index'],
-              ),
-              if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
-              SizedBox(height: appState.bodyFontSize*2),
-              if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: appState.songcontents![appState.songIndex!].chorus.asMap().entries.map(
-                  (item) {
-                    if(
-                      appState.songIndex==appState.highlighted?['index']&&
-                      appState.highlighted?['type']=='chorus' &&
-                      appState.highlighted?['line']==item.key+1){
+      body:appState.songIndex!=null?GestureDetector(
+        onTapDown: (TapDownDetails details) {
+          final RenderBox box = context.findRenderObject() as RenderBox; 
+          final position = box.globalToLocal(details.globalPosition);
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (position.dx > screenWidth *(3/4)) {
+            int? newIndex;
+            
+            if(appState.songIndex!!=appState.songcontents!.length-1){
+              newIndex = appState.songIndex!+1;
+            }
+            if (newIndex!=null){
+              appState.setSongIndex(newIndex);
+            }
+          }
+          if (position.dx < screenWidth *(1/4)) {
+            if (appState.songIndex!!=0){
+              appState.setSongIndex(appState.songIndex!-1);
+            }
+          }
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              children: [
+                SizedBox(height:(appState.titleFontSize*1.5)),
+                TitleHeading(
+                  widget: widget, 
+                  songIndex: appState.songIndex, 
+                  titleFontSize: appState.titleFontSize, 
+                  bodyFontSize: appState.bodyFontSize
+                ),
+                SizedBox(height:appState.bodyFontSize*2),
+                StanzaColumn(
+                  listStanza:appState.songcontents![appState.songIndex!].stanza[0], 
+                  bodyFontSize: appState.bodyFontSize,
+                  stanza: 1,
+                  highlightedLine: appState.highlighted?['line'],
+                  highlightedStanza: appState.highlighted?['stanza'],
+                  type:appState.highlighted?['type'],
+                  songIndex: appState.songIndex,
+                  highlightedIndex: appState.highlighted?['index'],
+                ),
+                if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
+                SizedBox(height: appState.bodyFontSize*2),
+                if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: appState.songcontents![appState.songIndex!].chorus.asMap().entries.map(
+                    (item) {
+                      if(
+                        appState.songIndex==appState.highlighted?['index']&&
+                        appState.highlighted?['type']=='chorus' &&
+                        appState.highlighted?['line']==item.key+1){
+                        return CenterText(
+                          texts: item.value,
+                          fontSize:appState.bodyFontSize,
+                          color:Colors.red,
+                          backgroundColor: appState.highlightColor,
+                        );                      
+                      }
                       return CenterText(
                         texts: item.value,
                         fontSize:appState.bodyFontSize,
                         color:Colors.red,
-                        backgroundColor: appState.highlightColor,
-                      );                      
+                      );
                     }
-                    return CenterText(
-                      texts: item.value,
-                      fontSize:appState.bodyFontSize,
-                      color:Colors.red,
-                    );
-                  }
-                ).toList(),
-              ),
-              SizedBox(height: appState.bodyFontSize*2),
-              ...otherStanza(ref,appState.bodyFontSize*2)
-            ],
+                  ).toList(),
+                ),
+                SizedBox(height: appState.bodyFontSize*2),
+                ...otherStanza(ref,appState.bodyFontSize*2)
+              ],
+            ),
           ),
         ),
       ):Container()
@@ -172,6 +188,40 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ];
       }).toList();
     return data.expand((element)=>element).toList();
+  }
+}
+
+class SettingsIcon extends StatelessWidget {
+  const SettingsIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed:()async{
+        Navigator.push(
+          context,
+         MaterialPageRoute(builder: (context) => const SettingsPage()),
+         );
+        }, 
+    icon: const Icon(Icons.settings));
+  }
+}
+
+class SearchIcon extends StatelessWidget {
+  const SearchIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: ()async{
+        showSearch(context: context, delegate:MySearchDelegant ());
+      }, 
+      icon: const Icon(Icons.search),
+    );
   }
 }
 

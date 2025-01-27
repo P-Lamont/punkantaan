@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:punkantaan/view/home_page.dart';
 import 'package:punkantaan/main.dart';
 
 class StanzaColumn extends ConsumerWidget {
@@ -54,32 +53,31 @@ class StanzaColumn extends ConsumerWidget {
 class TitleHeading extends ConsumerWidget {
   const TitleHeading({
     super.key,
-    required this.widget,
     required this.songIndex,
     required this.titleFontSize,
     required this.bodyFontSize,
   });
 
-  final MyHomePage widget;
   final int? songIndex;
   final double titleFontSize;
   final double bodyFontSize;
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
-
+    final appstate = ref.watch(riverpodProvider).songcontents![songIndex!];
+    String oldTitle =appstate.old==''?" (${appstate.old})":'';
     return Column( 
       crossAxisAlignment: CrossAxisAlignment.center,
       children:[
         CenterText(
-          texts:"${songIndex!+1}. ${ref.watch(riverpodProvider).songcontents![songIndex!].title} (${ref.watch(riverpodProvider).songcontents![songIndex!].old})", 
+          texts:"${songIndex!+1}. ${appstate.title}$oldTitle", 
           fontSize: titleFontSize,
           color: Colors.black,
           backgroundColor:(ref.watch(riverpodProvider).highlighted?['type']=='title'&&
             ref.watch(riverpodProvider).highlighted?['index']==songIndex)?ref.watch(riverpodProvider).highlightColor:null
         ),
         CenterText(
-          texts: 'Tune of:${ref.watch(riverpodProvider).songcontents![songIndex!].tune}', 
+          texts: 'Tune of:${appstate.tune}', 
           fontSize: bodyFontSize,
           color: Colors.black,
         ),
@@ -87,13 +85,13 @@ class TitleHeading extends ConsumerWidget {
           children: [
             const Spacer(flex: 4,),
             CenterText(
-              texts:'Key of ${ref.watch(riverpodProvider).songcontents![songIndex!].key.toUpperCase()}', 
+              texts:'Key of ${appstate.key.toUpperCase()}', 
               fontSize: bodyFontSize,
               color: Colors.black,
             ),
             const Spacer(flex: 1,),
             CenterText(
-              texts:'Beat: ${ref.watch(riverpodProvider).songcontents![songIndex!].beat}', 
+              texts:'Beat: ${appstate.beat}', 
               color: Colors.black,
               fontSize: bodyFontSize,
             ),

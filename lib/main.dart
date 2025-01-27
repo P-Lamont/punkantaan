@@ -1,6 +1,6 @@
 
-import 'package:punkantaan/home_page.dart';
-import 'package:punkantaan/riverpod_model.dart';
+import 'package:punkantaan/view/home_page.dart';
+import 'package:punkantaan/model/riverpod_model.dart';
 import 'dart:core';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class MyApp extends ConsumerWidget {
     appState.readJson();
     bool hasContents = appState.songcontents==null;
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Punkantaan',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

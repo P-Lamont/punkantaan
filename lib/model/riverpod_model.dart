@@ -10,6 +10,20 @@ class RiverpodModel extends ChangeNotifier{
   double bodyFontSize=18;
   Color highlightColor = Colors.yellow.shade400;
   Map<String,dynamic>? highlighted;
+  List<int> favorites =[];
+  List<int> recent =[];
+  Future<void> addtoFavorites(int data)async{
+    favorites.add(data);
+    List<String> favoritesData = favorites.map((data)=> data.toString()).toList();
+    await savePreference('favorites',favoritesData);
+    notifyListeners();    
+  }
+  Future<void> removeFavorites(int data)async{
+    favorites.remove(data);
+    List<String> favoritesData = favorites.map((data)=> data.toString()).toList();
+    await savePreference('favorites',favoritesData);
+    notifyListeners();    
+  }
   Future<void> readJson() async {
     final String response = await rootBundle.loadString('assets/songs.json');
     final data = await json.decode(response);
@@ -17,8 +31,9 @@ class RiverpodModel extends ChangeNotifier{
     songcontents= contents.map((e) => SongModel.fromJson(e)).toList();      
     notifyListeners();
   }
-  void setSongIndex(int data){
+  Future<void> setSongIndex(int data)async{
     songIndex =data;
+    await saveRecent(data+1);
     notifyListeners();
   }
   Future<void> setTitleSize(double data)async{
@@ -51,6 +66,9 @@ class RiverpodModel extends ChangeNotifier{
     final int? hGreen = prefs.getInt('HGreen');
     final int? hBlue = prefs.getInt('HBlue');
     final int? hAlpha = prefs.getInt('HAlpha');
+    List<int>? favorites = prefs.getStringList('favorites')?.map((element)=> int.parse(element)).toList();
+    List<int>? recent = prefs.getStringList('recent')?.map((element)=> int.parse(element)).toList();
+    
     if (titleSize!=null){
       setTitleSize(titleSize);
     } 
@@ -80,5 +98,16 @@ class RiverpodModel extends ChangeNotifier{
     setTitleSize(20);
     setBodySize(18);
     changeColorHighlight(Colors.yellow.shade400);
+  }
+  Future<void> saveRecent(int data)async{
+    if (recent.contains(data)){
+      recent.remove(data);
+    }
+    recent.insert(0,data);
+    if (recent.length>10){
+      recent.removeLast();
+    }
+    List<String> recentData = recent.map((data)=> data.toString()).toList();
+    await savePreference('favorites',recentData);    
   }
 }

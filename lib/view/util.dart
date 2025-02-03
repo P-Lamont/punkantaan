@@ -65,7 +65,7 @@ class TitleHeading extends ConsumerWidget {
   @override
   Widget build(BuildContext context,WidgetRef ref) {
     final appstate = ref.watch(riverpodProvider).songcontents![songIndex!];
-    String oldTitle =appstate.old==''?" (${appstate.old})":'';
+    String oldTitle = appstate.old!=''?" (${appstate.old} old)":'';
     return Column( 
       crossAxisAlignment: CrossAxisAlignment.center,
       children:[
@@ -128,6 +128,7 @@ class CenterText extends StatelessWidget {
     );
   }
 }
+
 class LeftAlignText extends StatelessWidget {
   const LeftAlignText({
     super.key,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:punkantaan/main.dart';
 import 'package:punkantaan/model/riverpod_model.dart';
+import 'package:punkantaan/view/favorites_page.dart';
+import 'package:punkantaan/view/recents_page.dart';
 import 'package:punkantaan/view/search_page.dart';
 import 'package:punkantaan/view/settings_page.dart';
 import 'package:punkantaan/view/util.dart';
@@ -26,7 +28,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     final appState = ref.watch(riverpodProvider);
     return  Scaffold(
       drawer:SizedBox(
-          width: MediaQuery.of(context).size.width*.75,
+          width: 
+          MediaQuery.of(context).size.width*.75,
           child: Scrollbar(
             thumbVisibility:true,
             // trackVisibility: true,
@@ -64,6 +67,18 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       },
                       tileColor: songIndex.isEven?Colors.white:Colors.white60,
                       textColor: Colors.black,
+                      trailing: IconButton(
+                        icon:Icon(appState.favorites.contains(songIndex+1)?Icons.favorite:
+                        Icons.favorite_border),
+                        onPressed:()async{
+                          bool isFavorite = appState.favorites.contains(songIndex+1);
+                          if (isFavorite){
+                            appState.removeFavorites(songIndex+1);
+                          }else{
+                            appState.addtoFavorites(songIndex+1);
+                          }
+                        },
+                      ),
                     // textColor: ,
                     ),
                   );
@@ -78,6 +93,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         title:const Text('Punkantaan'),
         actions:const [
           SearchIcon(),
+          RecentsIcon(),
+          FavoritesIcon(),
           SettingsIcon()
         ],
 
@@ -231,7 +248,40 @@ class SettingsIcon extends StatelessWidget {
     icon: const Icon(Icons.settings));
   }
 }
+class FavoritesIcon extends StatelessWidget {
+  const FavoritesIcon({
+    super.key,
+  });
 
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed:()async{
+        Navigator.push(
+          context,
+         MaterialPageRoute(builder: (context) => const FavoritesPage()),
+         );
+        }, 
+    icon: const Icon(Icons.favorite));
+  }
+}
+class RecentsIcon extends StatelessWidget {
+  const RecentsIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed:()async{
+        Navigator.push(
+          context,
+         MaterialPageRoute(builder: (context) => const RecentsPage()),
+         );
+        }, 
+    icon: const Icon(Icons.history));
+  }
+}
 class SearchIcon extends StatelessWidget {
   const SearchIcon({
     super.key,

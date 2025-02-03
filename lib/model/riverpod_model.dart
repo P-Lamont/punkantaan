@@ -14,6 +14,7 @@ class RiverpodModel extends ChangeNotifier{
   List<int> recent =[];
   Future<void> addtoFavorites(int data)async{
     favorites.add(data);
+    favorites.sort();
     List<String> favoritesData = favorites.map((data)=> data.toString()).toList();
     await savePreference('favorites',favoritesData);
     notifyListeners();    
@@ -66,9 +67,14 @@ class RiverpodModel extends ChangeNotifier{
     final int? hGreen = prefs.getInt('HGreen');
     final int? hBlue = prefs.getInt('HBlue');
     final int? hAlpha = prefs.getInt('HAlpha');
-    List<int>? favorites = prefs.getStringList('favorites')?.map((element)=> int.parse(element)).toList();
-    List<int>? recent = prefs.getStringList('recent')?.map((element)=> int.parse(element)).toList();
-    
+    final favoritesString = prefs.getStringList('favorites');
+    if (favoritesString!=null){
+      favorites = favoritesString.map((element)=> int.parse(element)).toList();
+    }
+    final recentString = prefs.getStringList('recent');
+    if (recentString!=null){
+      recent = recentString.map((element)=> int.parse(element)).toList();
+    }
     if (titleSize!=null){
       setTitleSize(titleSize);
     } 
@@ -108,6 +114,7 @@ class RiverpodModel extends ChangeNotifier{
       recent.removeLast();
     }
     List<String> recentData = recent.map((data)=> data.toString()).toList();
+    print('recents $data');
     await savePreference('favorites',recentData);    
   }
 }

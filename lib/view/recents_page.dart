@@ -10,7 +10,7 @@ class RecentsPage extends ConsumerWidget {
     final appState = ref.watch(riverpodProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorites'),
+        title: const Text('Recents'),
       ),
       body: Column(
         children:appState.recent.map((e){

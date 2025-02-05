@@ -99,6 +99,9 @@ class RiverpodModel extends ChangeNotifier{
     if (data is String){
       await prefs.setString(title, data);
     }
+    if (data is List<String>){
+      await prefs.setStringList(title, data);
+    }
   }
   void setDefaultSettings(){
     setTitleSize(20);

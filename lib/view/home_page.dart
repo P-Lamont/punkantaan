@@ -26,10 +26,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final appState = ref.watch(riverpodProvider);
+    double screenWidth =MediaQuery.of(context).size.width;
+    double? drawerSize;
+    if (screenWidth>500){
+      drawerSize = 350;
+    }else{
+      drawerSize =screenWidth*.75;
+    }
     return  Scaffold(
       drawer:SizedBox(
           width: 
-          MediaQuery.of(context).size.width*.75,
+          drawerSize,
           child: Scrollbar(
             thumbVisibility:true,
             // trackVisibility: true,

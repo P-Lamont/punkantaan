@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:punkantaan/main.dart';
+import 'package:punkantaan/model/model_riverpod.dart';
 
 class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({super.key});
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
-    final appState = ref.watch(riverpodProvider);
+    final appState = ref.watch(modelRiverpodProvider);
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorites'),
@@ -18,7 +19,7 @@ class FavoritesPage extends ConsumerWidget {
             title: Text("$e. ${appState.songcontents![e-1].title}"),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: ()async{
-              await appState.setSongIndex(e-1);
+              await appStateN.setSongIndex(e-1);
               if(context.mounted){
                 Navigator.pop(context);
               }

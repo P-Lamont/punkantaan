@@ -1,6 +1,6 @@
 
+import 'package:punkantaan/model/model_riverpod.dart';
 import 'package:punkantaan/view/home_page.dart';
-import 'package:punkantaan/model/riverpod_model.dart';
 import 'dart:core';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +12,9 @@ void main() {
 
 }
 
-final riverpodProvider = ChangeNotifierProvider<RiverpodModel>((ref){
-  return RiverpodModel();
-}); 
+// final riverpodProvider = ChangeNotifierProvider<RiverpodModel>((ref){
+//   return RiverpodModel();
+// }); 
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -22,9 +22,10 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context,WidgetRef ref){
-    final appState = ref.watch(riverpodProvider);
-    appState.initPreference();
-    appState.readJson();
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    final appState = ref.watch(modelRiverpodProvider);
+    appStateN.initPreference();
+    appStateN.readJson();
     bool hasContents = appState.songcontents==null;
     return MaterialApp(
       title: 'Punkantaan',

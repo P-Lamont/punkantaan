@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:punkantaan/main.dart';
 import 'package:punkantaan/controller/search_functions.dart';
-import 'package:punkantaan/model/riverpod_model.dart';
+import 'package:punkantaan/model/model_riverpod.dart';
 // import 'package:punkantaan/riverpod_model.dart';
 // final riverpodProvider = ChangeNotifierProvider<RiverpodModel>((ref){
 //   return RiverpodModel();
@@ -15,8 +14,8 @@ class SearchResultView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appState = ref.watch(riverpodProvider);
-    
+    // final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    final appState = ref.watch(modelRiverpodProvider);
     List<Map<String,dynamic>> resultlist =appState.songcontents!=null?
       searchFromSongs(query, appState.songcontents!):[];
     // var regString = RegExp(query, caseSensitive: false);
@@ -28,52 +27,51 @@ class SearchResultView extends ConsumerWidget {
       thickness: 15,
       radius: const Radius.circular(20),
       interactive: true,
-      child: SearchResultBuilder(resultlist: resultlist, appState: appState),
+      child: SearchResultBuilder(resultlist: resultlist),
     );
   }
 }
 
-class SearchResultBuilder extends StatelessWidget {
+class SearchResultBuilder extends ConsumerWidget {
   const SearchResultBuilder({
     super.key,
-    required this.resultlist,
-    required this.appState,
+    required this.resultlist
   });
 
   final List<Map<String, dynamic>> resultlist;
-  final RiverpodModel appState;
+
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return ListView.builder( 
       itemCount: resultlist.length, itemBuilder: (context, index) { 
         Map<String,dynamic>data = resultlist[index];
-        return SearchResultCard(data: data, appState: appState); 
+        return SearchResultCard(data: data); 
       }, 
     );
   }
 }
 
-class SearchResultCard extends StatelessWidget {
+class SearchResultCard extends ConsumerWidget {
   const SearchResultCard({
     super.key,
     required this.data,
-    required this.appState,
   });
 
   final Map<String, dynamic> data;
-  final RiverpodModel appState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    // final appState = ref.watch(modelRiverpodProvider);
     return Card(
       color: Theme.of(context).colorScheme.primaryContainer,
       child: ListTile( 
         title: Text(data['string']),
         subtitle: Text('On:${data['type']} Stanza: ${data['stanza']}'),
         onTap: () { 
-          appState.setHighlighted(data);
-          appState.setSongIndex(data['index']);
+          appStateN.setHighlighted(data);
+          appStateN.setSongIndex(data['index']);
           Navigator.pop(context);
         }, 
       ),

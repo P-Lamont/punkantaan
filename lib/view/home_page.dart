@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:punkantaan/main.dart';
-import 'package:punkantaan/model/riverpod_model.dart';
+import 'package:punkantaan/model/model_riverpod.dart';
 import 'package:punkantaan/view/favorites_page.dart';
 import 'package:punkantaan/view/recents_page.dart';
 import 'package:punkantaan/view/search_page.dart';
@@ -25,28 +24,23 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   }
   @override
   Widget build(BuildContext context) {
-    final appState = ref.watch(riverpodProvider);
-    double screenWidth =MediaQuery.of(context).size.width;
-    double? drawerSize;
-    if (screenWidth>500){
-      drawerSize = 350;
-    }else{
-      drawerSize =screenWidth*.75;
-    }
+    final songcontents = ref.watch(modelRiverpodProvider.select((it)=>it.songcontents));
+    final songIndex = ref.watch(modelRiverpodProvider.select((it)=>it.songIndex));
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    // print('rebuild ${appState.favorites}');
     return  Scaffold(
       drawer:SizedBox(
-          width: 
-          drawerSize,
+          width: getDrawerSize(),
           child: Scrollbar(
             thumbVisibility:true,
             // trackVisibility: true,
-            controller: _scrollController,
+            // controller: _scrollController,
             thickness: 16,
             radius: const Radius.circular(10), // Rounded corners
             interactive: true,
             child: ListView(
               padding: const EdgeInsets.all(0),
-              controller: _scrollController,
+              // controller: _scrollController,
               children: [
                 DrawerHeader( 
                   decoration: BoxDecoration( color: Theme.of(context).colorScheme.primaryContainer, ), 
@@ -59,8 +53,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     ),
                   ), 
                 ),
-                ...appState.songcontents!.map((item){
-                  int songIndex = appState.songcontents!.indexOf(item);
+                ...songcontents!.map((item){
+                  int songIndex = songcontents.indexOf(item);
                   return Card(
                     margin: const EdgeInsets.all(0),
                     color: songIndex.isEven?Colors.white:Colors.white60,
@@ -70,22 +64,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         overflow:TextOverflow.fade,
                       ),
                       onTap:(){
-                        _onItemTapped(ref,songIndex);
+                        appStateN.setSongIndex(songIndex);
+                        Navigator.pop(context);
+                        // _onItemTapped(ref,songIndex);
                       },
                       tileColor: songIndex.isEven?Colors.white:Colors.white60,
-                      textColor: Colors.black,
-                      trailing: IconButton(
-                        icon:Icon(appState.favorites.contains(songIndex+1)?Icons.favorite:
-                        Icons.favorite_border),
-                        onPressed:()async{
-                          bool isFavorite = appState.favorites.contains(songIndex+1);
-                          if (isFavorite){
-                            appState.removeFavorites(songIndex+1);
-                          }else{
-                            appState.addtoFavorites(songIndex+1);
-                          }
-                        },
-                      ),
+                      textColor: Colors.black
                     // textColor: ,
                     ),
                   );
@@ -104,27 +88,32 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           FavoritesIcon(),
           SettingsIcon()
         ],
-
       ),
-      body:appState.songIndex!=null?GestureDetector(
-        onTapDown: (details)=>tapDownDetailsFunction(details,appState),
-        child: SingleChildScrollView(
+      body:songIndex!=null?GestureDetector(
+        onTapDown: (details)=>tapDownDetailsFunction(details),
+        child: const SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: SongContentsColumn(appState: appState)
+            padding: EdgeInsets.all(15),
+            child: SongContentsColumn()
           ),
         ),
       ):Container()
     );
   }
-  void _onItemTapped(WidgetRef ref,int index) { 
-      // print(widget.songcontents[index].stanza);
-      // songIndex = index; 
-      ref.read(riverpodProvider.notifier).setSongIndex(index);
-
-    Navigator.pop(context);
+  double getDrawerSize(){
+    double screenWidth =MediaQuery.of(context).size.width;
+    late double drawerSize;
+    if (screenWidth>500){
+      drawerSize = 350;
+    }else{
+      drawerSize =screenWidth*.75;
+    }
+    return drawerSize;
   }
-  void tapDownDetailsFunction(TapDownDetails details,RiverpodModel appState){
+
+  void tapDownDetailsFunction(TapDownDetails details){
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    final appState = ref.watch(modelRiverpodProvider);
     final RenderBox box = context.findRenderObject() as RenderBox; 
     final position = box.globalToLocal(details.globalPosition);
     final screenWidth = MediaQuery.of(context).size.width;
@@ -135,44 +124,24 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         newIndex = appState.songIndex!+1;
       }
       if (newIndex!=null){
-        appState.setSongIndex(newIndex);
+        appStateN.setSongIndex(newIndex);
       }
     }
     if (position.dx < screenWidth *(1/4)) {
       if (appState.songIndex!!=0){
-        appState.setSongIndex(appState.songIndex!-1);
+        appStateN.setSongIndex(appState.songIndex!-1);
       }
     }
   }
 }
-List<Widget> otherStanza(RiverpodModel riverpod,double height){
-  // final riverpod = ref.watch(riverpodProvider);
-  List<List<Widget>>data =riverpod
-    .songcontents![riverpod.songIndex!]
-    .stanza.sublist(1).asMap().entries.map((item)
-    {
-      return [
-        StanzaColumn(
-          listStanza:item.value,
-          bodyFontSize: riverpod.bodyFontSize,
-          stanza: item.key+2,
-          highlightedLine: riverpod.highlighted?['line'],
-          highlightedStanza: riverpod.highlighted?['stanza'],
-          type:riverpod.highlighted?['type'],
-          songIndex: riverpod.songIndex,
-          highlightedIndex: riverpod.highlighted?['index'],
-        ),
-        SizedBox(height: height,)
-      ];
-    }).toList();
-  return data.expand((element)=>element).toList();
-}
-class SongContentsColumn extends StatelessWidget {
-  const SongContentsColumn({super.key, required this.appState});
 
-  final RiverpodModel appState;
+class SongContentsColumn extends ConsumerWidget {
+  const SongContentsColumn({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build( BuildContext context,WidgetRef ref) {
+    final appState = ref.watch(modelRiverpodProvider);
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
     return Column(
       children: [
         SizedBox(height:(appState.titleFontSize*1.5)),
@@ -181,7 +150,23 @@ class SongContentsColumn extends StatelessWidget {
           titleFontSize: appState.titleFontSize, 
           bodyFontSize: appState.bodyFontSize
         ),
+        TextButton.icon(
+          icon:Icon(appState.favorites.contains(appState.songIndex!+1)?Icons.favorite:
+          Icons.favorite_border),
+          label: appState.favorites.contains(appState.songIndex!+1)?
+            const Text('Remove from Favorites'):const Text('Add to Favorites'),
+          onPressed:()async{
+            bool isFavorite = appState.favorites.contains(appState.songIndex!+1);
+            print(isFavorite);
+            if (isFavorite){
+              await appStateN.removeFavorites(appState.songIndex!+1);
+            }else{
+              await appStateN.addtoFavorites(appState.songIndex!+1);
+            }
+          },
+        ),
         SizedBox(height:appState.bodyFontSize*2),
+
         StanzaColumn(
           listStanza:appState.songcontents![appState.songIndex!].stanza[0], 
           bodyFontSize: appState.bodyFontSize,
@@ -195,23 +180,43 @@ class SongContentsColumn extends StatelessWidget {
         if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
         SizedBox(height: appState.bodyFontSize*2),
         if (appState.songcontents![appState.songIndex!].chorus.isNotEmpty)
-        ChorusColumn(appState: appState),
+        const ChorusColumn(),
         SizedBox(height: appState.bodyFontSize*2),
-        ...otherStanza(appState,appState.bodyFontSize*2)
+        ...otherStanza(appState.bodyFontSize*2,ref)
       ],
     );
   }
+  List<Widget> otherStanza(double height,WidgetRef ref){
+    final appState = ref.watch(modelRiverpodProvider);
+    List<List<Widget>>data =appState
+      .songcontents![appState.songIndex!]
+      .stanza.sublist(1).asMap().entries.map((item)
+      {
+        return [
+          StanzaColumn(
+            listStanza:item.value,
+            bodyFontSize: appState.bodyFontSize,
+            stanza: item.key+2,
+            highlightedLine: appState.highlighted?['line'],
+            highlightedStanza: appState.highlighted?['stanza'],
+            type:appState.highlighted?['type'],
+            songIndex: appState.songIndex,
+            highlightedIndex: appState.highlighted?['index'],
+          ),
+          SizedBox(height: height,)
+        ];
+      }).toList();
+    return data.expand((element)=>element).toList();
+  }
 }
-class ChorusColumn extends StatelessWidget {
+class ChorusColumn extends ConsumerWidget {
   const ChorusColumn({
-    super.key,
-    required this.appState,
+    super.key
   });
 
-  final RiverpodModel appState;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
+    final appState = ref.watch(modelRiverpodProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: appState.songcontents![appState.songIndex!].chorus.asMap().entries.map(

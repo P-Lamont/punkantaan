@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:punkantaan/main.dart';
+import 'package:punkantaan/model/model_riverpod.dart';
 import 'package:punkantaan/view/licenses_page.dart';
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
-    final appState = ref.watch(riverpodProvider);
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    final appState = ref.watch(modelRiverpodProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -21,21 +22,21 @@ class SettingsPage extends ConsumerWidget {
             const Text('Title Font Size'),
             Slider(
               value: appState.titleFontSize,
-              onChanged: appState.setTitleSize,
+              onChanged: appStateN.setTitleSize,
               max: 30,
               min: 16,
             ),
             const Text('Body Font Size'),
             Slider(
               value: appState.bodyFontSize,
-              onChanged: appState.setBodySize,
+              onChanged: appStateN.setBodySize,
               max: 30,
               min: 16,
             ),
             const Text('Highlight color'),
             const HighlightColorPicker(),
             ElevatedButton(
-              onPressed: appState.setDefaultSettings, 
+              onPressed: appStateN.setDefaultSettings, 
               child: const Text('Set Default')
             ),
             ElevatedButton(
@@ -71,8 +72,8 @@ class _HighlightColorPickerState extends ConsumerState<HighlightColorPicker> {
     setState(() => pickerColor = color);
   }
   void _showAlertDialog(BuildContext context,WidgetRef ref){
-
-    final appState = ref.watch(riverpodProvider);
+    final appStateN = ref.watch(modelRiverpodProvider.notifier);
+    final appState = ref.watch(modelRiverpodProvider);
     pickerColor =appState.highlightColor;
     showDialog(
       context: context,
@@ -92,7 +93,7 @@ class _HighlightColorPickerState extends ConsumerState<HighlightColorPicker> {
               onPressed: ()async{
                 // print(pickerColor!);
                 // print('${pickerColor!.red},${pickerColor!.green},${pickerColor!.blue},${pickerColor!.alpha}');
-                await appState.changeColorHighlight(pickerColor!);
+                await appStateN.changeColorHighlight(pickerColor!);
                 if(context.mounted){
                   Navigator.of(context).pop();
                 }

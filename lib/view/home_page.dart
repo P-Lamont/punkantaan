@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:punkantaan/model/model_riverpod.dart';
-import 'package:punkantaan/view/favorites_page.dart';
-import 'package:punkantaan/view/recents_page.dart';
+import 'package:punkantaan/controller/bible.dart';
 import 'package:punkantaan/view/search_page.dart';
-import 'package:punkantaan/view/settings_page.dart';
 import 'package:punkantaan/view/util.dart';
 
 class MyHomePage extends ConsumerStatefulWidget {
@@ -13,18 +11,20 @@ class MyHomePage extends ConsumerStatefulWidget {
   ConsumerState  createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends ConsumerState<MyHomePage> {
+class _MyHomePageState extends ConsumerState<MyHomePage>with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController(
     keepScrollOffset: false
   );
-
+  final ScrollController _scrollSec = ScrollController(
+    keepScrollOffset: false
+  );
   @override void dispose() {
     _scrollController.dispose(); 
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    final songcontents = ref.watch(modelRiverpodProvider.select((it)=>it.songcontents));
+    final songcontents = ref.watch(modelRiverpodProvider.select((it)=>it.songcontents))??[];
     final songIndex = ref.watch(modelRiverpodProvider.select((it)=>it.songIndex));
     final appStateN = ref.watch(modelRiverpodProvider.notifier);
     // print('rebuild ${appState.favorites}');
@@ -53,7 +53,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     ),
                   ), 
                 ),
-                ...songcontents!.map((item){
+                ...songcontents.map((item){
                   int songIndex = songcontents.indexOf(item);
                   return Card(
                     margin: const EdgeInsets.all(0),
@@ -84,15 +84,18 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         title:const Text('Punkantaan'),
         actions:const [
           SearchIcon(),
-          RecentsIcon(),
+          // RecentsIcon(),
+          BibleIcon(),
           FavoritesIcon(),
           SettingsIcon()
         ],
       ),
       body:songIndex!=null?GestureDetector(
-        onTapDown: (details)=>tapDownDetailsFunction(details),
-        child: const SingleChildScrollView(
-          child: Padding(
+        onHorizontalDragEnd: (details)=>slideDetails(details),
+        // onHorizontalDragStart:(details)=>slideDetails(details) ,
+        child:  SingleChildScrollView(
+          controller: _scrollSec,
+          child: const Padding(
             padding: EdgeInsets.all(15),
             child: SongContentsColumn()
           ),
@@ -111,13 +114,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return drawerSize;
   }
 
-  void tapDownDetailsFunction(TapDownDetails details){
+  void slideDetails(DragEndDetails details){
     final appStateN = ref.watch(modelRiverpodProvider.notifier);
     final appState = ref.watch(modelRiverpodProvider);
-    final RenderBox box = context.findRenderObject() as RenderBox; 
-    final position = box.globalToLocal(details.globalPosition);
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (position.dx > screenWidth *(3/4)) {
+    if (details.primaryVelocity! < 0) {
       int? newIndex;
       
       if(appState.songIndex!!=appState.songcontents!.length-1){
@@ -127,7 +127,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         appStateN.setSongIndex(newIndex);
       }
     }
-    if (position.dx < screenWidth *(1/4)) {
+    if (details.primaryVelocity! > 0 ) {
       if (appState.songIndex!!=0){
         appStateN.setSongIndex(appState.songIndex!-1);
       }
@@ -252,9 +252,8 @@ class SettingsIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed:()async{
-        Navigator.push(
-          context,
-         MaterialPageRoute(builder: (context) => const SettingsPage()),
+        Navigator.pushNamed(
+          context,'/settings'
          );
         }, 
     icon: const Icon(Icons.settings));
@@ -269,9 +268,8 @@ class FavoritesIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed:()async{
-        Navigator.push(
-          context,
-         MaterialPageRoute(builder: (context) => const FavoritesPage()),
+        Navigator.pushNamed(
+          context,'/fav'
          );
         }, 
     icon: const Icon(Icons.favorite));
@@ -286,9 +284,8 @@ class RecentsIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed:()async{
-        Navigator.push(
-          context,
-         MaterialPageRoute(builder: (context) => const RecentsPage()),
+        Navigator.pushNamed(
+          context,'/recents'
          );
         }, 
     icon: const Icon(Icons.history));
@@ -309,5 +306,22 @@ class SearchIcon extends StatelessWidget {
     );
   }
 }
+class BibleIcon extends ConsumerWidget {
+  const BibleIcon({
+    super.key,
+  });
 
+  @override
+  Widget build(BuildContext context,WidgetRef ref) {
+    final bibleProviderN = ref.watch(bibleNotifierProvider.notifier);
+    return IconButton(
+      onPressed:()async{
+        bibleProviderN.listBooks();
+        Navigator.pushNamed(
+          context,'/listbooks'
+         );
+        }, 
+    icon: const Icon(Icons.book));
+  }
+}
 

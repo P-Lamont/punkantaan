@@ -8,12 +8,13 @@ import 'package:punkantaan/model/model_riverpod.dart';
 // }); 
 
 class SearchResultView extends ConsumerWidget {
-  const SearchResultView({super.key, required this.query});
+  const SearchResultView({super.key});
 
-  final String query;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String,String>;
+    final query = args['query']??'';
     // final appStateN = ref.watch(modelRiverpodProvider.notifier);
     final appState = ref.watch(modelRiverpodProvider);
     List<Map<String,dynamic>> resultlist =appState.songcontents!=null?
@@ -108,8 +109,11 @@ class  MySearchDelegant extends SearchDelegate{
 
   @override
   Widget buildResults(BuildContext context) {
-    return SearchResultView(query:query);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushNamed(context, '/search',arguments: {'query':query});
+    });
+    return const SizedBox.shrink();
+  }
     
     @override
     Widget buildSuggestions(BuildContext context) {

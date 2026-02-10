@@ -22,7 +22,6 @@ class ModelRiverpod extends _$ModelRiverpod{
     state = state.copyWith(favorites:newFavorites);
     // state = state.copyWith(favorites:[...state.favorites]..sort());
     List<String> favoritesData = newFavorites.map((data)=> data.toString()).toList();
-    print('added $favoritesData');
     await savePreference('favorites',favoritesData);
   }
   Future<void> removeFavorites(int data)async{
@@ -30,7 +29,6 @@ class ModelRiverpod extends _$ModelRiverpod{
     state = state.copyWith(favorites:newFavorites);
     // favorites.remove(data);
     List<String> favoritesData = newFavorites.map((data)=> data.toString()).toList();
-    print('remove $favoritesData');
     await savePreference('favorites',favoritesData);
 
   }

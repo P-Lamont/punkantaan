@@ -6,7 +6,7 @@ part of 'model_riverpod.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$modelRiverpodHash() => r'72cf8d61604966363ae780c64843345a8b6b18da';
+String _$modelRiverpodHash() => r'f2e801d83a6c14d678d8e5b1e1b9e63b28090789';
 
 /// See also [ModelRiverpod].
 @ProviderFor(ModelRiverpod)

@@ -42,6 +42,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/app/src
+/android/app/.cxx
 /android/gradle
 /linux
 /macos

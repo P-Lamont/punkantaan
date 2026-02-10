@@ -1,6 +1,6 @@
 # punkantaan
 
-Songbook app for In Tuwali for the elderly
+Christian Songbook app for In Tuwali for the elderly
 
 ## Getting Started
 

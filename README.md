@@ -1,6 +1,6 @@
 # punkantaan
 
-A new Flutter project.
+Songbook app for In Tuwali for the elderly
 
 ## Getting Started
 
